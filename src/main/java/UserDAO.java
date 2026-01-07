@@ -97,6 +97,28 @@ public final class UserDAO {
         }
     }
 
+
+public static Customer getById(int userId) {
+    String sql = "SELECT id, username, full_name, handle, birthday, permanent_address, other_addresses FROM users WHERE id=?";
+    try (Connection c = Database.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) return null;
+            return new Customer(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("full_name"),
+                    rs.getString("handle"),
+                    rs.getString("birthday"),
+                    rs.getString("permanent_address"),
+                    rs.getString("other_addresses")
+            );
+        }
+    } catch (Exception e) {
+        return null;
+    }
+}
+
     public static boolean updateProfile(int userId, String fullName, String birthday, String permanentAddress, String otherAddresses) {
         if (userId <= 0) return false;
         if (isBlank(fullName) || isBlank(permanentAddress)) return false;

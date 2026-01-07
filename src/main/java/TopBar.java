@@ -48,6 +48,7 @@ public final class TopBar extends JPanel implements SessionListener {
 
         logoutBtn.addActionListener(e -> {
             Session.clearPending();
+            SessionDAO.clearRememberedUser();
             Session.logout();
             nav.show(AppNavigator.RESTAURANTS);
         });

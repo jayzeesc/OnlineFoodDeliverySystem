@@ -132,6 +132,7 @@ public final class ProfilePanel extends JPanel {
 
         logout.addActionListener(e -> {
             Session.clearPending();
+            SessionDAO.clearRememberedUser();
             Session.logout();
             nav.show(AppNavigator.RESTAURANTS);
         });

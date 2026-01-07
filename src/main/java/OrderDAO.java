@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class OrderDAO {
-
     public static final double DELIVERY_FEE = 35.0;
 
     private OrderDAO() {}
@@ -56,7 +55,6 @@ public final class OrderDAO {
             }
 
             return orderId;
-
         } catch (Exception e) {
             return -1;
         }
@@ -64,15 +62,12 @@ public final class OrderDAO {
 
     public static double averageEtaForUser(int userId) {
         String sql = "SELECT AVG(eta_minutes) AS avg_eta FROM orders WHERE user_id=?";
-        try (Connection c = Database.connect();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
+        try (Connection c = Database.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return 0;
                 return rs.getDouble("avg_eta");
             }
-
         } catch (Exception e) {
             return 0;
         }
@@ -80,14 +75,10 @@ public final class OrderDAO {
 
     public static List<OrderHistoryRow> historyForUser(int userId) {
         List<OrderHistoryRow> out = new ArrayList<>();
-        String sql =
-                "SELECT o.id, o.created_at, o.status, o.eta_minutes, o.total, r.name AS restaurant " +
-                        "FROM orders o JOIN restaurants r ON r.id = o.restaurant_id " +
-                        "WHERE o.user_id = ? ORDER BY o.id DESC";
-
-        try (Connection c = Database.connect();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
+        String sql = "SELECT o.id, o.created_at, o.status, o.eta_minutes, o.total, r.name AS restaurant " +
+                "FROM orders o JOIN restaurants r ON r.id=o.restaurant_id " +
+                "WHERE o.user_id=? ORDER BY o.id DESC";
+        try (Connection c = Database.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -101,7 +92,6 @@ public final class OrderDAO {
                     ));
                 }
             }
-
         } catch (Exception e) {
             return out;
         }
@@ -109,30 +99,32 @@ public final class OrderDAO {
     }
 
     public static String receiptForOrder(int orderId) {
+        String headSql = "SELECT o.id, o.created_at, o.status, o.eta_minutes, o.delivery_fee, o.subtotal, o.total, " +
+                "u.username, u.full_name, u.handle, u.permanent_address, " +
+                "r.name AS restaurant, r.location AS location " +
+                "FROM orders o JOIN users u ON u.id=o.user_id JOIN restaurants r ON r.id=o.restaurant_id " +
+                "WHERE o.id=?";
 
-        String headSql =
-                "SELECT o.id, o.created_at, o.status, o.eta_minutes, o.delivery_fee, o.subtotal, o.total, " +
-                        "u.username, u.full_name, u.handle, u.permanent_address, " +
-                        "r.name AS restaurant, r.location AS location " +
-                        "FROM orders o " +
-                        "JOIN users u ON u.id = o.user_id " +
-                        "JOIN restaurants r ON r.id = o.restaurant_id " +
-                        "WHERE o.id = ?";
-
-        String itemsSql =
-                "SELECT item_name, unit_price, qty FROM order_items WHERE order_id = ?";
+        String itemsSql = "SELECT item_name, unit_price, qty FROM order_items WHERE order_id=?";
 
         try (Connection c = Database.connect()) {
-
-            String createdAt, status, username, fullName, handle, address, restaurant, location;
+            String createdAt;
+            String status;
             int eta;
-            double fee, subtotal, total;
+            double fee;
+            double subtotal;
+            double total;
+            String username;
+            String fullName;
+            String handle;
+            String address;
+            String restaurant;
+            String location;
 
             try (PreparedStatement ps = c.prepareStatement(headSql)) {
                 ps.setInt(1, orderId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) return "Order not found.";
-
                     createdAt = rs.getString("created_at");
                     status = rs.getString("status");
                     eta = rs.getInt("eta_minutes");
@@ -153,44 +145,59 @@ public final class OrderDAO {
                 ps.setInt(1, orderId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        int q = rs.getInt("qty");
                         String n = rs.getString("item_name");
                         double p = rs.getDouble("unit_price");
+                        int q = rs.getInt("qty");
                         double line = p * q;
-                        lines.add(q + " x " + n + " @ ₱" +
-                                String.format("%.2f", p) +
-                                " = ₱" + String.format("%.2f", line));
+                        lines.add(q + " x " + n + " @ ₱" + String.format("%.2f", p) + " = ₱" + String.format("%.2f", line));
                     }
                 }
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.append("===== RECEIPT =====\n");
-            sb.append("Order ID: ").append(orderId).append("\n");
-            sb.append("Date: ").append(createdAt).append("\n");
-            sb.append("Status: ").append(status).append("\n");
-            sb.append("ETA: ").append(eta).append(" minutes\n\n");
+            sb.append("===== RECEIPT =====
+");
+            sb.append("Order ID: ").append(orderId).append("
+");
+            sb.append("Date: ").append(createdAt).append("
+");
+            sb.append("Status: ").append(status).append("
+");
+            sb.append("ETA: ").append(eta).append(" minutes
 
-            sb.append("Customer: ").append(fullName).append("\n");
-            sb.append("Username: ").append(username).append("\n");
-            sb.append("Handle: ").append(handle).append("\n");
-            sb.append("Deliver to: ").append(address).append("\n\n");
+");
 
-            sb.append("Restaurant: ").append(restaurant).append("\n");
-            sb.append("Location: ").append(location).append("\n\n");
+            sb.append("Customer: ").append(fullName).append("
+");
+            sb.append("Username: ").append(username).append("
+");
+            sb.append("Handle: ").append(handle).append("
+");
+            sb.append("Deliver to: ").append(address).append("
 
-            sb.append("Items:\n");
-            for (String l : lines) {
-                sb.append("- ").append(l).append("\n");
-            }
+");
 
-            sb.append("\nSubtotal: ₱").append(String.format("%.2f", subtotal)).append("\n");
-            sb.append("Delivery Fee: ₱").append(String.format("%.2f", fee)).append("\n");
-            sb.append("TOTAL: ₱").append(String.format("%.2f", total)).append("\n");
-            sb.append("===================\n");
+            sb.append("Restaurant: ").append(restaurant).append("
+");
+            sb.append("Location: ").append(location).append("
 
+");
+
+            sb.append("Items:
+");
+            for (String l : lines) sb.append("- ").append(l).append("
+");
+
+            sb.append("
+Subtotal: ₱").append(String.format("%.2f", subtotal)).append("
+");
+            sb.append("Delivery Fee: ₱").append(String.format("%.2f", fee)).append("
+");
+            sb.append("TOTAL: ₱").append(String.format("%.2f", total)).append("
+");
+            sb.append("===================
+");
             return sb.toString();
-
         } catch (Exception e) {
             return "Failed to load receipt.";
         }

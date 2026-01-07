@@ -54,6 +54,13 @@ public final class Schema {
                     "qty INTEGER NOT NULL," +
                     "FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE" +
                     ")");
+
+            s.executeUpdate("CREATE TABLE IF NOT EXISTS app_session (" +
+                    "id INTEGER PRIMARY KEY CHECK (id = 1)," +
+                    "user_id INTEGER," +
+                    "FOREIGN KEY(user_id) REFERENCES users(id)" +
+                    ")");
+            s.executeUpdate("INSERT OR IGNORE INTO app_session(id, user_id) VALUES(1, NULL)");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

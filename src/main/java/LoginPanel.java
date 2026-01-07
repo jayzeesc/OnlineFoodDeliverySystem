@@ -61,6 +61,7 @@ public final class LoginPanel extends JPanel {
                 return;
             }
             Session.setUser(c);
+            SessionDAO.rememberUser(c.getId());
             PendingCheckout pending = Session.getPending();
             if (pending != null && MenuPanelRef.get() != null) {
                 MenuPanelRef.get().loadFromPending(pending);
