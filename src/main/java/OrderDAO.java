@@ -155,48 +155,31 @@ public final class OrderDAO {
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.append("===== RECEIPT =====
-");
-            sb.append("Order ID: ").append(orderId).append("
-");
-            sb.append("Date: ").append(createdAt).append("
-");
-            sb.append("Status: ").append(status).append("
-");
-            sb.append("ETA: ").append(eta).append(" minutes
 
-");
+            sb.append("===== RECEIPT =====\n");
+            sb.append("Order ID: ").append(orderId).append("\n");
+            sb.append("Date: ").append(createdAt).append("\n");
+            sb.append("Status: ").append(status).append("\n");
+            sb.append("ETA: ").append(eta).append(" minutes\n\n");
 
-            sb.append("Customer: ").append(fullName).append("
-");
-            sb.append("Username: ").append(username).append("
-");
-            sb.append("Handle: ").append(handle).append("
-");
-            sb.append("Deliver to: ").append(address).append("
+            sb.append("Customer: ").append(fullName).append("\n");
+            sb.append("Username: ").append(username).append("\n");
+            sb.append("Handle: ").append(handle).append("\n");
+            sb.append("Deliver to: ").append(address).append("\n\n");
 
-");
+            sb.append("Restaurant: ").append(restaurant).append("\n");
+            sb.append("Location: ").append(location).append("\n\n");
 
-            sb.append("Restaurant: ").append(restaurant).append("
-");
-            sb.append("Location: ").append(location).append("
+            sb.append("Items:\n");
+            for (String line : lines) {
+                sb.append("- ").append(line).append("\n");
+            }
 
-");
+            sb.append("\nSubtotal: ₱").append(String.format("%.2f", subtotal)).append("\n");
+            sb.append("Delivery Fee: ₱").append(String.format("%.2f", fee)).append("\n");
+            sb.append("TOTAL: ₱").append(String.format("%.2f", total)).append("\n");
+            sb.append("===================\n");
 
-            sb.append("Items:
-");
-            for (String l : lines) sb.append("- ").append(l).append("
-");
-
-            sb.append("
-Subtotal: ₱").append(String.format("%.2f", subtotal)).append("
-");
-            sb.append("Delivery Fee: ₱").append(String.format("%.2f", fee)).append("
-");
-            sb.append("TOTAL: ₱").append(String.format("%.2f", total)).append("
-");
-            sb.append("===================
-");
             return sb.toString();
         } catch (Exception e) {
             return "Failed to load receipt.";
