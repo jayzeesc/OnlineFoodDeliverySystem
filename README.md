@@ -1,6 +1,8 @@
 # Online Food Delivery System
 >by Group 2: Artillagas, Lazareto, Merluza
 
+>Submitted to: Prof Ed | DSA Subject
+
 Description: A platform for managing restaurants, customers, and food orders, facilitating the entire delivery process.
 Key Features:
 Browse menus, place orders, and track delivery status.
