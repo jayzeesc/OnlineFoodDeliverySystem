@@ -1,8 +1,6 @@
 # Online Food Delivery System
 Group 2
-> Artillagas
-> Lazareto
-> Merluza
+> Artillagas, Lazareto, Merluza
 
 Description: A platform for managing restaurants, customers, and food orders, facilitating the entire delivery process.
 Key Features:
